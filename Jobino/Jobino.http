@@ -1,0 +1,6 @@
+@Jobino_HostAddress = http://localhost:5224
+
+GET {{Jobino_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
