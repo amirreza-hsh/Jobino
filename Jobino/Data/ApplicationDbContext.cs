@@ -13,7 +13,7 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<JobCategory> JobCategories { get; set; } = null!;
-
+    public DbSet<Job> Jobs { get; set; } = null!;
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
