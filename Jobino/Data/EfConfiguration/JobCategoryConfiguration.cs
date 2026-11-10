@@ -15,6 +15,6 @@ public class JobCategoryEntityConfiguration
 
         builder.Property(x => x.Name)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(100);
     }
 }
