@@ -26,4 +26,7 @@ public class CreateJobRequestDto
     [Required]
     [Range(1, 3, ErrorMessage = "لطفاً نوع همکاری را انتخاب کنید")]
     public EmploymentType EmploymentType { get; set; }
+    public bool IsRemote { get; set; }
+
+    public bool IsInternship { get; set; }
 }

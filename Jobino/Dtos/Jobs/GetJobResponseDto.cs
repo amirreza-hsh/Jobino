@@ -1,4 +1,5 @@
-﻿
+﻿using Jobino.Entities;
+
 namespace Jobino.DTOs.Jobs;
 
 public class GetJobResponseDto
@@ -16,6 +17,11 @@ public class GetJobResponseDto
     public int JobCategoryId { get; set; }
 
     public string JobCategoryName { get; set; } = null!;
+
+    public EmploymentType EmploymentType { get; set; }
+
+    public bool IsRemote { get; set; }
+    public bool IsInternship { get; set; }
 
     public DateTime DateCreated { get; set; }
 }

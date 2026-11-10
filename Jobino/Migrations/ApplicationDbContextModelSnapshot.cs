@@ -42,6 +42,15 @@ namespace Jobino.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("EmploymentType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsInternship")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRemote")
+                        .HasColumnType("bit");
+
                     b.Property<int>("JobCategoryId")
                         .HasColumnType("int");
 
