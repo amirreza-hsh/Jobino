@@ -73,4 +73,64 @@ public class JobCategoriesController(ApplicationDbContext context)
 
         return Ok(category);
     }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> Update(
+        int id,
+        UpdateJobCategoryRequestDto request)
+    {
+        var category = await context.JobCategories
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (category is null)
+        {
+            return NotFound("دسته‌بندی موردنظر یافت نشد");
+        }
+
+        var normalizedName = request.Name.Trim().ToUpper();
+
+        if (normalizedName == "")
+        {
+            return BadRequest("نام دسته‌بندی نمی‌تواند خالی باشد");
+        }
+
+        if (await context.JobCategories
+            .AnyAsync(x => x.Name == normalizedName && x.Id != id))
+        {
+            return BadRequest("این دسته‌بندی قبلاً ثبت شده است");
+        }
+
+        category.Name = normalizedName;
+
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(int id)
+    {
+        var category = await context.JobCategories
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (category is null)
+        {
+            return NotFound("دسته‌بندی موردنظر یافت نشد");
+        }
+
+        if (await context.Jobs
+            .AnyAsync(x => x.JobCategoryId == id))
+        {
+            return BadRequest(
+                "این دسته‌بندی دارای آگهی است و نمی‌توان آن را حذف کرد");
+        }
+
+        context.JobCategories.Remove(category);
+
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+
 }

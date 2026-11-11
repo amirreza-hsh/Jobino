@@ -4,7 +4,7 @@ using Jobino.DTOs.Jobs;
 using Jobino.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using System.Text.Json.Serialization;
 namespace Jobino.Controllers;
 
 [Route("api/[controller]")]
@@ -65,6 +65,7 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
 
         return Ok(jobs);
     }
+
 
     [HttpGet("{id}")]
     public async Task<ActionResult> GetById(int id)
