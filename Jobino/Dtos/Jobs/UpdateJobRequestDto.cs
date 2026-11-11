@@ -8,6 +8,9 @@ public class UpdateJobRequestDto
     [Range(1, int.MaxValue, ErrorMessage = "دسته‌بندی معتبر نیست")]
     public int JobCategoryId { get; set; }
 
+    [Range(1, int.MaxValue, ErrorMessage = "شرکت معتبر نیست")]
+    public int CompanyId { get; set; }
+
     [Required(ErrorMessage = "عنوان آگهی الزامی است")]
     [MaxLength(100, ErrorMessage = "عنوان نمی‌تواند بیشتر از 100 کاراکتر باشد")]
     public string Title { get; set; } = null!;

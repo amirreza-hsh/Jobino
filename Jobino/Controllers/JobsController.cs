@@ -19,10 +19,17 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
         {
             return BadRequest("دسته‌بندی انتخاب‌شده معتبر نیست");
         }
+        if (!await context.Companies
+            .AnyAsync(x => x.Id == request.CompanyId))
+        {
+            return BadRequest("شرکت انتخاب‌شده معتبر نیست");
+        }
 
         var job = new Job
         {
             JobCategoryId = request.JobCategoryId,
+            CompanyId = request.CompanyId,
+
             Title = request.Title.Trim(),
             Description = request.Description,
             Salary = request.Salary,
@@ -56,6 +63,8 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
                 City = x.City,
                 JobCategoryId = x.JobCategoryId,
                 JobCategoryName = x.Category.Name,
+                CompanyId = x.CompanyId,
+                CompanyName = x.Company.PersianName,
                 EmploymentType = x.EmploymentType,
                 IsRemote = x.IsRemote,
                 IsInternship = x.IsInternship,
@@ -81,6 +90,8 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
                 City = x.City,
                 JobCategoryId = x.JobCategoryId,
                 JobCategoryName = x.Category.Name,
+                CompanyId = x.CompanyId,
+                CompanyName = x.Company.PersianName,
                 EmploymentType = x.EmploymentType,
                 IsRemote = x.IsRemote,
                 IsInternship = x.IsInternship,
@@ -106,6 +117,11 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
         {
             return BadRequest("دسته‌بندی انتخاب‌شده معتبر نیست");
         }
+        if (!await context.Companies
+            .AnyAsync(x => x.Id == request.CompanyId))
+        {
+            return BadRequest("شرکت انتخاب‌شده معتبر نیست");
+        }
 
         var job = await context.Jobs
             .FirstOrDefaultAsync(x => x.Id == id);
@@ -116,6 +132,7 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
         }
 
         job.JobCategoryId = request.JobCategoryId;
+        job.CompanyId = request.CompanyId;
         job.Title = request.Title.Trim();
         job.Description = request.Description;
         job.Salary = request.Salary;

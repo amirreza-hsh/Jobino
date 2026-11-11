@@ -27,7 +27,6 @@ public class CompanyConfiguration
             .HasMaxLength(20);
 
         builder.Property(x => x.LogoUrl)
-            .IsRequired()
             .HasMaxLength(500);
 
         builder.Property(x => x.Website)

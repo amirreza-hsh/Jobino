@@ -9,8 +9,7 @@ public class Company : BaseEntitiy
 
     public string PhoneNumber { get; set; } = null!;
 
-    public string LogoUrl { get; set; } = null!;
-
+    public string? LogoUrl { get; set; }
 
     public string? Website { get; set; }
 

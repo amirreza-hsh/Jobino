@@ -17,6 +17,9 @@ public class GetJobResponseDto
     public int JobCategoryId { get; set; }
 
     public string JobCategoryName { get; set; } = null!;
+    public int CompanyId { get; set; }
+
+    public string CompanyName { get; set; } = null!;
 
     public EmploymentType EmploymentType { get; set; }
 
