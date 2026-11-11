@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Jobino.Data.EfConfigurations;
 
-public class JobEntityConfiguration
+public class JobConfiguration
     : IEntityTypeConfiguration<Job>
 {
     public void Configure(EntityTypeBuilder<Job> builder)
@@ -26,5 +26,10 @@ public class JobEntityConfiguration
         builder.HasOne(x => x.Category)
             .WithMany(x => x.Jobs)
             .HasForeignKey(x => x.JobCategoryId);
+
+        builder.HasOne(x => x.Company)
+            .WithMany(x => x.Jobs)
+            .HasForeignKey(x => x.CompanyId);
+
     }
 }
