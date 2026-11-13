@@ -1,6 +1,7 @@
 using Jobino.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using Jobino.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,9 @@ builder.Services.AddControllers()
             new JsonStringEnumConverter());
     });
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<
+    IPasswordHasherService,
+    PasswordHasherService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
