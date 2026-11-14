@@ -12,7 +12,8 @@ namespace Jobino.Controllers;
 [ApiController]
 public class AuthController(
     ApplicationDbContext context,
-    IPasswordHasherService passwordHasherService)
+    IPasswordHasherService passwordHasherService,
+    IJwtService jwtService)
     : ControllerBase
 {
     [HttpPost("register")]
@@ -71,6 +72,38 @@ public class AuthController(
         {
             Id = user.Id,
             Message = "ثبت ‌نام با موفقیت انجام شد"
+        });
+    }
+    [HttpPost("login")]
+    public async Task<ActionResult> Login(LoginRequestDto request)
+    {
+        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+
+        var user = await context.Users
+            .Include(x => x.UserRoles)
+            .ThenInclude(x => x.Role)
+            .FirstOrDefaultAsync(x => x.Email == normalizedEmail);
+
+        var errorMessage = "ایمیل یا رمز عبور صحیح نیست";
+
+        if (user is null)
+        {
+            return BadRequest(errorMessage);
+        }
+
+        var isPasswordCorrect = passwordHasherService
+            .Verify(user.PasswordHash, request.Password);
+
+        if (!isPasswordCorrect)
+        {
+            return BadRequest(errorMessage);
+        }
+
+        var token = jwtService.GenerateToken(user);
+
+        return Ok(new
+        {
+            Token = token
         });
     }
 }
