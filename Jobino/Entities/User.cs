@@ -10,4 +10,5 @@ public class User : BaseEntitiy
     public string PasswordHash { get; set; } = null!;
 
     public List<UserRole> UserRoles { get; set; } = null!;
+    public List<Resume> Resumes { get; set; } = null!;
 }

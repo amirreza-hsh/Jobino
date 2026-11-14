@@ -24,6 +24,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Role> Roles { get; set; } = null!;
 
     public DbSet<UserRole> UserRoles { get; set; } = null!;
+    public DbSet<Resume> Resumes { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

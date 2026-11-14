@@ -201,6 +201,37 @@ namespace Jobino.Migrations
                     b.ToTable("JobCategories", (string)null);
                 });
 
+            modelBuilder.Entity("Jobino.Entities.Resume", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Resumes", (string)null);
+                });
+
             modelBuilder.Entity("Jobino.Entities.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -322,6 +353,17 @@ namespace Jobino.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("Jobino.Entities.Resume", b =>
+                {
+                    b.HasOne("Jobino.Entities.User", "User")
+                        .WithMany("Resumes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Jobino.Entities.UserRole", b =>
                 {
                     b.HasOne("Jobino.Entities.Role", "Role")
@@ -365,6 +407,8 @@ namespace Jobino.Migrations
 
             modelBuilder.Entity("Jobino.Entities.User", b =>
                 {
+                    b.Navigation("Resumes");
+
                     b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
