@@ -139,7 +139,102 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
 
         return Ok(jobs);
     }
+    [Authorize(Roles = "EMPLOYER")]
+    [HttpGet("my-jobs")]
+    public async Task<ActionResult> GetMyJobs()
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var jobs = await context.Jobs
+            .Where(x => x.Company.OwnerUserId == userId)
+            .Select(x => new GetJobResponseDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Description = x.Description,
+                Salary = x.Salary,
+                City = x.City,
+                JobCategoryId = x.JobCategoryId,
+                JobCategoryName = x.Category.Name,
+                CompanyId = x.CompanyId,
+                CompanyName = x.Company.PersianName,
+                EmploymentType = x.EmploymentType,
+                IsRemote = x.IsRemote,
+                IsInternship = x.IsInternship,
+                IsClosed = x.IsClosed,
+                DateCreated = x.DateCreated
+            })
+            .ToListAsync();
+
+        return Ok(jobs);
+    }
+
+    [HttpGet("by-company/{id}")]
+    public async Task<ActionResult> GetByCompany(int id)
+    {
+        var jobs = await context.Jobs
+            .Where(x => x.CompanyId == id && !x.IsClosed)
+            .Select(x => new GetJobResponseDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Description = x.Description,
+                Salary = x.Salary,
+                City = x.City,
+                JobCategoryId = x.JobCategoryId,
+                JobCategoryName = x.Category.Name,
+                CompanyId = x.CompanyId,
+                CompanyName = x.Company.PersianName,
+                EmploymentType = x.EmploymentType,
+                IsRemote = x.IsRemote,
+                IsInternship = x.IsInternship,
+                IsClosed = x.IsClosed,
+                DateCreated = x.DateCreated
+            })
+            .ToListAsync();
+
+        return Ok(jobs);
+    }
+
+    [HttpGet("by-employment-type/{employmentType}")]
+    public async Task<ActionResult> GetByEmploymentType(
+    EmploymentType employmentType)
+    {
+        if (employmentType != EmploymentType.FullTime
+            && employmentType != EmploymentType.PartTime
+            && employmentType != EmploymentType.Contractual)
+        {
+            return BadRequest("نوع همکاری معتبر نیست");
+        }
+
+        var jobs = await context.Jobs
+            .Where(x => x.EmploymentType == employmentType && !x.IsClosed)
+            .Select(x => new GetJobResponseDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Description = x.Description,
+                Salary = x.Salary,
+                City = x.City,
+                JobCategoryId = x.JobCategoryId,
+                JobCategoryName = x.Category.Name,
+                CompanyId = x.CompanyId,
+                CompanyName = x.Company.PersianName,
+                EmploymentType = x.EmploymentType,
+                IsRemote = x.IsRemote,
+                IsInternship = x.IsInternship,
+                IsClosed = x.IsClosed,
+                DateCreated = x.DateCreated
+            })
+            .ToListAsync();
+
+        return Ok(jobs);
+    }
 
     [HttpGet("{id}")]
     public async Task<ActionResult> GetById(int id)

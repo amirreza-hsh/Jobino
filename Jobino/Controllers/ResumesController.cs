@@ -62,6 +62,41 @@ public class ResumesController(ApplicationDbContext context) : ControllerBase
         return StatusCode(201, new { Id = resume.Id });
     }
 
+    [HttpGet("{id}/download")]
+    public async Task<ActionResult> Download(int id)
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var fileName = await context.Resumes
+            .Where(x => x.Id == id && x.UserId == userId)
+            .Select(x => x.FilePath)
+            .FirstOrDefaultAsync();
+
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return NotFound("رزومهٔ موردنظر یافت نشد");
+        }
+
+        var localAppData = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData);
+
+        var fullPath = Path.Combine(localAppData, "Jobino", "Resumes", fileName);
+
+        if (!System.IO.File.Exists(fullPath))
+        {
+            return NotFound("فایل رزومه یافت نشد");
+        }
+
+        var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
+
+        return File(stream, "application/pdf", "resume.pdf");
+    }
+
     [HttpGet]
     public async Task<ActionResult> Get()
     {

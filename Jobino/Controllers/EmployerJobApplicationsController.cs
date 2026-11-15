@@ -62,6 +62,41 @@ public class EmployerJobApplicationsController(ApplicationDbContext context)
         return NoContent();
     }
 
+    [HttpGet("{id}/resume")]
+    public async Task<ActionResult> DownloadResume(int id)
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var fileName = await context.JobApplications
+            .Where(x => x.Id == id && x.Job.Company.OwnerUserId == userId)
+            .Select(x => x.Resume.FilePath)
+            .FirstOrDefaultAsync();
+
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return NotFound("رزومهٔ این درخواست یافت نشد");
+        }
+
+        var localAppData = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData);
+
+        var fullPath = Path.Combine(localAppData, "Jobino", "Resumes", fileName);
+
+        if (!System.IO.File.Exists(fullPath))
+        {
+            return NotFound("فایل رزومه یافت نشد");
+        }
+
+        var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
+
+        return File(stream, "application/pdf", "resume.pdf");
+    }
+
     [HttpGet]
     public async Task<ActionResult> Get()
     {

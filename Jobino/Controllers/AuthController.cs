@@ -1,12 +1,12 @@
-﻿
-using Jobino.Data;
+﻿using Jobino.Data;
 using Jobino.DTOs.Auth;
 using Jobino.Entities;
 using Jobino.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 namespace Jobino.Controllers;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -82,6 +82,35 @@ public class AuthController(
         {
             Id = user.Id,
             Message = "ثبت‌ نام با موفقیت انجام شد"
+        });
+    }
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult> GetMe()
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var user = await context.Users
+            .Include(x => x.UserRoles)
+            .ThenInclude(x => x.Role)
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user is null)
+        {
+            return NotFound("حساب کاربری یافت نشد");
+        }
+
+        return Ok(new
+        {
+            user.Id,
+            user.FullName,
+            user.Email,
+            Roles = user.UserRoles.Select(x => x.Role.Name).ToList()
         });
     }
 

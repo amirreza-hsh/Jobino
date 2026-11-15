@@ -10,7 +10,9 @@ namespace Jobino.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CompaniesController(ApplicationDbContext context)
+public class CompaniesController(
+    ApplicationDbContext context,
+    IWebHostEnvironment environment)
     : ControllerBase
 {
     [Authorize(Roles = "EMPLOYER")]
@@ -49,6 +51,56 @@ public class CompaniesController(ApplicationDbContext context)
             new { Id = company.Id }
         );
     }
+    [Authorize(Roles = "EMPLOYER")]
+    [HttpPost("{id}/logo")]
+    public async Task<ActionResult> UploadLogo(
+    int id,
+    [FromForm] UploadCompanyLogoRequestDto request)
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var company = await context.Companies
+            .FirstOrDefaultAsync(x => x.Id == id && x.OwnerUserId == userId);
+
+        if (company is null)
+        {
+            return NotFound("شرکت موردنظر یافت نشد");
+        }
+
+        if (request.Logo.Length == 0)
+        {
+            return BadRequest("فایل لوگو خالی است");
+        }
+
+        var extension = Path.GetExtension(request.Logo.FileName).ToLowerInvariant();
+
+        if (extension != ".png" && extension != ".jpg" && extension != ".jpeg")
+        {
+            return BadRequest("پسوند لوگو باید PNG، JPG یا JPEG باشد");
+        }
+
+        var uploadFolder = Path.Combine(environment.WebRootPath, "company-logos");
+        Directory.CreateDirectory(uploadFolder);
+
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var filePath = Path.Combine(uploadFolder, fileName);
+
+        await using (var stream = new FileStream(filePath, FileMode.CreateNew))
+        {
+            await request.Logo.CopyToAsync(stream);
+        }
+
+        company.LogoUrl = $"/company-logos/{fileName}";
+        await context.SaveChangesAsync();
+
+        return Ok(new { company.LogoUrl });
+    }
+
 
     [HttpGet]
     public async Task<ActionResult> Get()
