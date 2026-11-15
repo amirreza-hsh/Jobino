@@ -14,6 +14,64 @@ namespace Jobino.Controllers;
 public class JobApplicationsController(ApplicationDbContext context)
     : ControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult> Get()
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var applications = await context.JobApplications
+            .Where(x => x.Resume.UserId == userId)
+            .Select(x => new GetMyJobApplicationResponseDto
+            {
+                Id = x.Id,
+                JobId = x.JobId,
+                JobTitle = x.Job.Title,
+                CompanyName = x.Job.Company.PersianName,
+                Status = x.Status,
+                DateCreated = x.DateCreated
+            })
+            .ToListAsync();
+
+        return Ok(applications);
+    }
+    [HttpPut("{id}/withdraw")]
+    public async Task<ActionResult> Withdraw(int id)
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var application = await context.JobApplications
+            .FirstOrDefaultAsync(x => x.Id == id
+                && x.Resume.UserId == userId);
+
+        if (application is null)
+        {
+            return NotFound("درخواست استخدام موردنظر یافت نشد");
+        }
+
+        if (application.Status != JobApplicationStatus.Submitted
+            && application.Status != JobApplicationStatus.UnderReview
+            && application.Status != JobApplicationStatus.Interview)
+        {
+            return BadRequest("در این وضعیت امکان انصراف از درخواست وجود ندارد");
+        }
+
+        application.Status = JobApplicationStatus.Withdrawn;
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+
     [HttpPost]
     public async Task<ActionResult> Create(CreateJobApplicationRequestDto request)
     {

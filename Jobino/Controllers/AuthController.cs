@@ -17,13 +17,25 @@ public class AuthController(
     : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<ActionResult> Register(
-        RegisterRequestDto request)
+    public Task<ActionResult> Register(RegisterRequestDto request)
+    {
+        return RegisterUser(request, "JOBSEEKER", "کارجو");
+    }
+
+    [HttpPost("register-employer")]
+    public Task<ActionResult> RegisterEmployer(RegisterRequestDto request)
+    {
+        return RegisterUser(request, "EMPLOYER", "کارفرما");
+    }
+
+    private async Task<ActionResult> RegisterUser(
+        RegisterRequestDto request,
+        string roleName,
+        string roleDisplayName)
     {
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
-        if (await context.Users
-            .AnyAsync(x => x.Email == normalizedEmail))
+        if (await context.Users.AnyAsync(x => x.Email == normalizedEmail))
         {
             return BadRequest("این ایمیل قبلاً ثبت شده است");
         }
@@ -32,9 +44,7 @@ public class AuthController(
         {
             return BadRequest("نام و نام خانوادگی معتبر نیست");
         }
-
-        var hashedPassword = passwordHasherService.Hash(
-            request.Password);
+        var hashedPassword = passwordHasherService.Hash(request.Password);
 
         var user = new User
         {
@@ -43,24 +53,24 @@ public class AuthController(
             PasswordHash = hashedPassword
         };
 
-        var jobSeekerRole = await context.Roles
-            .FirstOrDefaultAsync(x => x.Name == "JOBSEEKER");
+        var role = await context.Roles
+            .FirstOrDefaultAsync(x => x.Name == roleName);
 
-        if (jobSeekerRole is null)
+        if (role is null)
         {
-            jobSeekerRole = new Role
+            role = new Role
             {
-                Name = "JOBSEEKER",
-                DisplayName = "کارجو"
+                Name = roleName,
+                DisplayName = roleDisplayName
             };
 
-            context.Roles.Add(jobSeekerRole);
+            context.Roles.Add(role);
         }
 
         var userRole = new UserRole
         {
             User = user,
-            Role = jobSeekerRole
+            Role = role
         };
 
         context.Users.Add(user);
@@ -71,9 +81,10 @@ public class AuthController(
         return StatusCode(201, new
         {
             Id = user.Id,
-            Message = "ثبت ‌نام با موفقیت انجام شد"
+            Message = "ثبت‌ نام با موفقیت انجام شد"
         });
     }
+
     [HttpPost("login")]
     public async Task<ActionResult> Login(LoginRequestDto request)
     {

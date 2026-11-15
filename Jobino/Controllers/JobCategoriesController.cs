@@ -3,6 +3,7 @@ using Jobino.DTOs.JobCategories;
 using Jobino.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Jobino.Controllers;
 
@@ -11,6 +12,7 @@ namespace Jobino.Controllers;
 public class JobCategoriesController(ApplicationDbContext context)
     : ControllerBase
 {
+    [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<ActionResult> Create(
         CreateJobCategoryRequestDto request)
@@ -73,7 +75,7 @@ public class JobCategoriesController(ApplicationDbContext context)
 
         return Ok(category);
     }
-
+    [Authorize(Roles = "ADMIN")]
     [HttpPut("{id}")]
     public async Task<ActionResult> Update(
         int id,
@@ -106,7 +108,7 @@ public class JobCategoriesController(ApplicationDbContext context)
 
         return NoContent();
     }
-
+    [Authorize(Roles = "ADMIN")]
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {

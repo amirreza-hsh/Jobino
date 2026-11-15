@@ -1,9 +1,10 @@
-﻿
-using Jobino.Data;
+﻿using Jobino.Data;
 using Jobino.DTOs.Companies;
 using Jobino.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Jobino.Controllers;
 
@@ -12,12 +13,20 @@ namespace Jobino.Controllers;
 public class CompaniesController(ApplicationDbContext context)
     : ControllerBase
 {
+    [Authorize(Roles = "EMPLOYER")]
     [HttpPost]
     public async Task<ActionResult> Create(
         CreateCompanyRequestDto request)
     {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
         var company = new Company
         {
+            OwnerUserId = userId,
             PersianName = request.PersianName.Trim(),
             EnglishName = request.EnglishName.Trim(),
             PhoneNumber = request.PhoneNumber.Trim(),
@@ -95,13 +104,20 @@ public class CompaniesController(ApplicationDbContext context)
         return Ok(company);
     }
 
+    [Authorize(Roles = "EMPLOYER")]
     [HttpPut("{id}")]
     public async Task<ActionResult> Update(
         int id,
         UpdateCompanyRequestDto request)
     {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
         var company = await context.Companies
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id && x.OwnerUserId == userId);
 
         if (company is null)
         {
@@ -124,11 +140,18 @@ public class CompaniesController(ApplicationDbContext context)
         return NoContent();
     }
 
+    [Authorize(Roles = "EMPLOYER")]
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
         var company = await context.Companies
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id && x.OwnerUserId == userId);
 
         if (company is null)
         {

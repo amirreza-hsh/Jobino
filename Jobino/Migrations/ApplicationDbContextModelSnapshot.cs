@@ -389,7 +389,7 @@ namespace Jobino.Migrations
                     b.HasOne("Jobino.Entities.JobCategory", "Category")
                         .WithMany("Jobs")
                         .HasForeignKey("JobCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Category");

@@ -25,7 +25,8 @@ public class JobConfiguration
 
         builder.HasOne(x => x.Category)
             .WithMany(x => x.Jobs)
-            .HasForeignKey(x => x.JobCategoryId);
+            .HasForeignKey(x => x.JobCategoryId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.HasOne(x => x.Company)
             .WithMany(x => x.Jobs)
