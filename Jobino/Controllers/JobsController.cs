@@ -156,7 +156,10 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
         {
             return NotFound("آگهی موردنظر یافت نشد");
         }
-
+        if (await context.JobApplications.AnyAsync(x => x.JobId == id))
+        {
+            return BadRequest("این آگهی درخواست استخدام دارد و قابل حذف نیست");
+        }
         context.Jobs.Remove(job);
 
         await context.SaveChangesAsync();
