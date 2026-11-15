@@ -30,7 +30,8 @@ public class JobConfiguration
 
         builder.HasOne(x => x.Company)
             .WithMany(x => x.Jobs)
-            .HasForeignKey(x => x.CompanyId);
+            .HasForeignKey(x => x.CompanyId)
+            .OnDelete(DeleteBehavior.NoAction);
 
     }
 }

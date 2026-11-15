@@ -62,6 +62,7 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
     public async Task<ActionResult> Get()
     {
         var jobs = await context.Jobs
+            .Where(x => !x.IsClosed)
             .Select(x => new GetJobResponseDto
             {
                 Id = x.Id,
@@ -76,12 +77,69 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
                 EmploymentType = x.EmploymentType,
                 IsRemote = x.IsRemote,
                 IsInternship = x.IsInternship,
+                IsClosed = x.IsClosed,
                 DateCreated = x.DateCreated
             })
             .ToListAsync();
 
         return Ok(jobs);
     }
+    [HttpGet("by-category/{id}")]
+    public async Task<ActionResult> GetByCategory(int id)
+    {
+        var jobs = await context.Jobs
+            .Where(x => x.JobCategoryId == id && !x.IsClosed)
+            .Select(x => new GetJobResponseDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Description = x.Description,
+                Salary = x.Salary,
+                City = x.City,
+                JobCategoryId = x.JobCategoryId,
+                JobCategoryName = x.Category.Name,
+                CompanyId = x.CompanyId,
+                CompanyName = x.Company.PersianName,
+                EmploymentType = x.EmploymentType,
+                IsRemote = x.IsRemote,
+                IsInternship = x.IsInternship,
+                IsClosed = x.IsClosed,
+                DateCreated = x.DateCreated
+            })
+            .ToListAsync();
+
+        return Ok(jobs);
+    }
+
+    [HttpGet("by-city/{city}")]
+    public async Task<ActionResult> GetByCity(string city)
+    {
+        var cityName = city.Trim();
+
+        var jobs = await context.Jobs
+            .Where(x => x.City == cityName && !x.IsClosed)
+            .Select(x => new GetJobResponseDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Description = x.Description,
+                Salary = x.Salary,
+                City = x.City,
+                JobCategoryId = x.JobCategoryId,
+                JobCategoryName = x.Category.Name,
+                CompanyId = x.CompanyId,
+                CompanyName = x.Company.PersianName,
+                EmploymentType = x.EmploymentType,
+                IsRemote = x.IsRemote,
+                IsInternship = x.IsInternship,
+                IsClosed = x.IsClosed,
+                DateCreated = x.DateCreated
+            })
+            .ToListAsync();
+
+        return Ok(jobs);
+    }
+
 
     [HttpGet("{id}")]
     public async Task<ActionResult> GetById(int id)
@@ -102,6 +160,7 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
                 EmploymentType = x.EmploymentType,
                 IsRemote = x.IsRemote,
                 IsInternship = x.IsInternship,
+                IsClosed = x.IsClosed,
                 DateCreated = x.DateCreated
             })
             .FirstOrDefaultAsync();
@@ -161,6 +220,32 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
 
         return NoContent();
     }
+    [Authorize(Roles = "EMPLOYER")]
+    [HttpPut("{id}/close")]
+    public async Task<ActionResult> Close(int id)
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var job = await context.Jobs
+            .FirstOrDefaultAsync(x => x.Id == id
+                && x.Company.OwnerUserId == userId);
+
+        if (job is null)
+        {
+            return NotFound("آگهی موردنظر یافت نشد");
+        }
+
+        job.IsClosed = true;
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
 
     [Authorize(Roles = "EMPLOYER")]
     [HttpDelete("{id}")]

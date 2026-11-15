@@ -82,9 +82,17 @@ public class JobApplicationsController(ApplicationDbContext context)
             return Unauthorized();
         }
 
-        if (!await context.Jobs.AnyAsync(x => x.Id == request.JobId))
+        var job = await context.Jobs
+    .FirstOrDefaultAsync(x => x.Id == request.JobId);
+
+        if (job is null)
         {
             return NotFound("آگهی موردنظر یافت نشد");
+        }
+
+        if (job.IsClosed)
+        {
+            return BadRequest("این آگهی بسته شده و درخواست جدید نمی ‌پذیرد");
         }
 
         var ownsResume = await context.Resumes

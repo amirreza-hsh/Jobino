@@ -159,6 +159,9 @@ namespace Jobino.Migrations
                     b.Property<int>("EmploymentType")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsInternship")
                         .HasColumnType("bit");
 
@@ -383,7 +386,7 @@ namespace Jobino.Migrations
                     b.HasOne("Jobino.Entities.Company", "Company")
                         .WithMany("Jobs")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Jobino.Entities.JobCategory", "Category")

@@ -25,6 +25,7 @@ public class GetJobResponseDto
 
     public bool IsRemote { get; set; }
     public bool IsInternship { get; set; }
+    public bool IsClosed { get; set; }
 
     public DateTime DateCreated { get; set; }
 }

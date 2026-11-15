@@ -17,6 +17,7 @@ public class Job : BaseEntitiy
     public bool IsRemote { get; set; }
 
     public bool IsInternship { get; set; }
+    public bool IsClosed { get; set; }
 
     public JobCategory Category { get; set; } = null!;
     public Company Company { get; set; } = null!;
