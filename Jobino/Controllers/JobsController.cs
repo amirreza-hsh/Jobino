@@ -59,10 +59,26 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult> Get()
+    public async Task<ActionResult> Get(int page = 1, int pageSize = 10)
     {
+        if (page < 1 || pageSize < 1 || pageSize > 50)
+        {
+            return BadRequest("شماره صفحه باید حداقل ۱ و اندازه صفحه بین ۱ و ۵۰ باشد");
+        }
+
+        var skip = ((long)page - 1) * pageSize;
+
+        if (skip > int.MaxValue)
+        {
+            return BadRequest("شماره صفحه بیش از حد بزرگ است");
+        }
+
         var jobs = await context.Jobs
             .Where(x => !x.IsClosed)
+            .OrderByDescending(x => x.DateCreated)
+            .ThenByDescending(x => x.Id)
+            .Skip((int)skip)
+            .Take(pageSize)
             .Select(x => new GetJobResponseDto
             {
                 Id = x.Id,
@@ -84,11 +100,31 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
 
         return Ok(jobs);
     }
+
     [HttpGet("by-category/{id}")]
-    public async Task<ActionResult> GetByCategory(int id)
+    public async Task<ActionResult> GetByCategory(
+        int id,
+        int page = 1,
+        int pageSize = 10)
     {
+        if (page < 1 || pageSize < 1 || pageSize > 50)
+        {
+            return BadRequest("شماره صفحه باید حداقل ۱ و اندازه صفحه بین ۱ و ۵۰ باشد");
+        }
+
+        var skip = ((long)page - 1) * pageSize;
+
+        if (skip > int.MaxValue)
+        {
+            return BadRequest("شماره صفحه بیش از حد بزرگ است");
+        }
+
         var jobs = await context.Jobs
             .Where(x => x.JobCategoryId == id && !x.IsClosed)
+            .OrderByDescending(x => x.DateCreated)
+            .ThenByDescending(x => x.Id)
+            .Skip((int)skip)
+            .Take(pageSize)
             .Select(x => new GetJobResponseDto
             {
                 Id = x.Id,
@@ -112,12 +148,31 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
     }
 
     [HttpGet("by-city/{city}")]
-    public async Task<ActionResult> GetByCity(string city)
+    public async Task<ActionResult> GetByCity(
+        string city,
+        int page = 1,
+        int pageSize = 10)
     {
         var cityName = city.Trim();
 
+        if (page < 1 || pageSize < 1 || pageSize > 50)
+        {
+            return BadRequest("شماره صفحه باید حداقل ۱ و اندازه صفحه بین ۱ و ۵۰ باشد");
+        }
+
+        var skip = ((long)page - 1) * pageSize;
+
+        if (skip > int.MaxValue)
+        {
+            return BadRequest("شماره صفحه بیش از حد بزرگ است");
+        }
+
         var jobs = await context.Jobs
             .Where(x => x.City == cityName && !x.IsClosed)
+            .OrderByDescending(x => x.DateCreated)
+            .ThenByDescending(x => x.Id)
+            .Skip((int)skip)
+            .Take(pageSize)
             .Select(x => new GetJobResponseDto
             {
                 Id = x.Id,
@@ -139,9 +194,12 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
 
         return Ok(jobs);
     }
+
     [Authorize(Roles = "EMPLOYER")]
     [HttpGet("my-jobs")]
-    public async Task<ActionResult> GetMyJobs()
+    public async Task<ActionResult> GetMyJobs(
+        int page = 1,
+        int pageSize = 10)
     {
         var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -150,8 +208,24 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
             return Unauthorized();
         }
 
+        if (page < 1 || pageSize < 1 || pageSize > 50)
+        {
+            return BadRequest("شماره صفحه باید حداقل ۱ و اندازه صفحه بین ۱ و ۵۰ باشد");
+        }
+
+        var skip = ((long)page - 1) * pageSize;
+
+        if (skip > int.MaxValue)
+        {
+            return BadRequest("شماره صفحه بیش از حد بزرگ است");
+        }
+
         var jobs = await context.Jobs
             .Where(x => x.Company.OwnerUserId == userId)
+            .OrderByDescending(x => x.DateCreated)
+            .ThenByDescending(x => x.Id)
+            .Skip((int)skip)
+            .Take(pageSize)
             .Select(x => new GetJobResponseDto
             {
                 Id = x.Id,
@@ -175,10 +249,29 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
     }
 
     [HttpGet("by-company/{id}")]
-    public async Task<ActionResult> GetByCompany(int id)
+    public async Task<ActionResult> GetByCompany(
+        int id,
+        int page = 1,
+        int pageSize = 10)
     {
+        if (page < 1 || pageSize < 1 || pageSize > 50)
+        {
+            return BadRequest("شماره صفحه باید حداقل ۱ و اندازه صفحه بین ۱ و ۵۰ باشد");
+        }
+
+        var skip = ((long)page - 1) * pageSize;
+
+        if (skip > int.MaxValue)
+        {
+            return BadRequest("شماره صفحه بیش از حد بزرگ است");
+        }
+
         var jobs = await context.Jobs
             .Where(x => x.CompanyId == id && !x.IsClosed)
+            .OrderByDescending(x => x.DateCreated)
+            .ThenByDescending(x => x.Id)
+            .Skip((int)skip)
+            .Take(pageSize)
             .Select(x => new GetJobResponseDto
             {
                 Id = x.Id,
@@ -203,7 +296,9 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
 
     [HttpGet("by-employment-type/{employmentType}")]
     public async Task<ActionResult> GetByEmploymentType(
-    EmploymentType employmentType)
+        EmploymentType employmentType,
+        int page = 1,
+        int pageSize = 10)
     {
         if (employmentType != EmploymentType.FullTime
             && employmentType != EmploymentType.PartTime
@@ -212,8 +307,24 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
             return BadRequest("نوع همکاری معتبر نیست");
         }
 
+        if (page < 1 || pageSize < 1 || pageSize > 50)
+        {
+            return BadRequest("شماره صفحه باید حداقل ۱ و اندازه صفحه بین ۱ و ۵۰ باشد");
+        }
+
+        var skip = ((long)page - 1) * pageSize;
+
+        if (skip > int.MaxValue)
+        {
+            return BadRequest("شماره صفحه بیش از حد بزرگ است");
+        }
+
         var jobs = await context.Jobs
             .Where(x => x.EmploymentType == employmentType && !x.IsClosed)
+            .OrderByDescending(x => x.DateCreated)
+            .ThenByDescending(x => x.Id)
+            .Skip((int)skip)
+            .Take(pageSize)
             .Select(x => new GetJobResponseDto
             {
                 Id = x.Id,
@@ -315,6 +426,7 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
 
         return NoContent();
     }
+
     [Authorize(Roles = "EMPLOYER")]
     [HttpPut("{id}/close")]
     public async Task<ActionResult> Close(int id)
@@ -340,7 +452,6 @@ public class JobsController(ApplicationDbContext context) : ControllerBase
 
         return NoContent();
     }
-
 
     [Authorize(Roles = "EMPLOYER")]
     [HttpDelete("{id}")]
