@@ -11,4 +11,5 @@ public class User : BaseEntitiy
 
     public List<UserRole> UserRoles { get; set; } = null!;
     public List<Resume> Resumes { get; set; } = null!;
+    public List<Company> OwnedCompanies { get; set; } = null!;
 }

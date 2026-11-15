@@ -58,6 +58,9 @@ namespace Jobino.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int?>("OwnerUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PersianName")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -77,6 +80,8 @@ namespace Jobino.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerUserId");
 
                     b.ToTable("Companies", (string)null);
                 });
@@ -344,6 +349,16 @@ namespace Jobino.Migrations
                     b.ToTable("UserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("Jobino.Entities.Company", b =>
+                {
+                    b.HasOne("Jobino.Entities.User", "OwnerUser")
+                        .WithMany("OwnedCompanies")
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("OwnerUser");
+                });
+
             modelBuilder.Entity("Jobino.Entities.CompanyIndustry", b =>
                 {
                     b.HasOne("Jobino.Entities.Company", "Company")
@@ -455,6 +470,8 @@ namespace Jobino.Migrations
 
             modelBuilder.Entity("Jobino.Entities.User", b =>
                 {
+                    b.Navigation("OwnedCompanies");
+
                     b.Navigation("Resumes");
 
                     b.Navigation("UserRoles");

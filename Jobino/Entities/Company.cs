@@ -19,7 +19,9 @@ public class Company : BaseEntitiy
     public string EmployeeCountRange { get; set; } = null!;
     public string? Province { get; set; }
     public string? City { get; set; }
+    public int? OwnerUserId { get; set; }
 
+    public User? OwnerUser { get; set; }
     public List<Job> Jobs { get; set; } = null!;
     public List<CompanyIndustry> CompanyIndustries { get; set; } = null!;
 

@@ -13,6 +13,10 @@ public class CompanyConfiguration
         builder.ToTable("Companies");
 
         builder.HasKey(x => x.Id);
+        builder.HasOne(x => x.OwnerUser)
+            .WithMany(x => x.OwnedCompanies)
+            .HasForeignKey(x => x.OwnerUserId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.Property(x => x.PersianName)
             .IsRequired()
